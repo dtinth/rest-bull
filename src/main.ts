@@ -160,22 +160,26 @@ class AddAction extends CommandLineAction {
       redisUrl: this._redisUrl.value,
       queueName: this._queueName.value,
     })
-    const headers: Record<string, string> = {}
-    for (const header of this._headers.values) {
-      const colon = header.indexOf(':')
-      if (colon === -1) {
-        throw new Error(`Invalid header: ${header}`)
+    try {
+      const headers: Record<string, string> = {}
+      for (const header of this._headers.values) {
+        const colon = header.indexOf(':')
+        if (colon === -1) {
+          throw new Error(`Invalid header: ${header}`)
+        }
+        const key = header.substring(0, colon).trim()
+        const value = header.substring(colon + 1).trim()
+        headers[key] = value
       }
-      const key = header.substring(0, colon).trim()
-      const value = header.substring(colon + 1).trim()
-      headers[key] = value
+      await restBull.addJob({
+        uri: this._url.value!,
+        httpMethod: this._method.value! as any,
+        body: this._body.value,
+        headers,
+      })
+    } finally {
+      await restBull.dispose()
     }
-    return restBull.addJob({
-      uri: this._url.value!,
-      httpMethod: this._method.value! as any,
-      body: this._body.value,
-      headers,
-    })
   }
 }
 

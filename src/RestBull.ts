@@ -63,6 +63,10 @@ export class RestBull {
     await this.queue.add(name, data, opts)
   }
 
+  async dispose() {
+    await Promise.all([this.queue?.disconnect(), this.redis.disconnect()])
+  }
+
   private async processJob(job: Job) {
     this.fastify.log.info(`Processing job ${job.id}`)
     const data = (() => {
